@@ -73,16 +73,30 @@ try {
     $ProgressPreference = "SilentlyContinue"
     Invoke-WebRequest "$( $repoUrl )/releases/download/nightly/YimMenu.dll" -OutFile $libPath
 } catch {
-    Write-Output "[-] failed to write the menu to disk; is it already loaded?"
+    Write-Output "[-] failed to download the file; check your network and ensure that the menu has not already been loaded."
     return
 }
 
 try {
     # This will throw an exception if Windows Defender is enabled!
-    $libHash = Get-FileHash -Path $libPath -Algorithm SHA256
+    $libHash = Get-FileHash -Path $libPath -Algorithm SHA256 -ErrorAction SilentlyContinue
     Write-Output "[+] file downloaded successfully. sha256=$( $libHash.Hash.ToLower() )"
 } catch {
-    Write-Output "[-] failed to compute the file hash; the menu may have been falsely-flagged by your anti-virus!"
+    Write-Output @"
+[-] the menu may have been falsely-flagged by your anti-virus!
+    game modifications are often (erroneously) flagged as malware by anti-viruses due to the way
+    they interact with games.
+    
+    to fix this, temporarely disable your anti-virus or add the following directory to its
+    exclusions list: $( $dataDir )
+
+"@
+
+    $confirmation = Read-Host "    do you need help with this? [y/N]"
+    if ( $confirmation.ToLower() -eq "y" ) {
+        Start-Process "https://support.microsoft.com/en-us/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26"
+    }
+
     return
 }
 
