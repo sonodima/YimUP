@@ -68,7 +68,7 @@ New-Item -ItemType dir -Path $dataDir -ErrorAction Ignore
 $libPath = $dataDir + "/" + $libName
 
 try {
-    Write-Output "[>] downloading the latest release"
+    Write-Output "[>] downloading the latest release..."
     Invoke-WebRequest "$( $repoUrl )/releases/download/nightly/YimMenu.dll" -OutFile $libPath
 } catch {
     Write-Output "[-] failed to write the menu to disk; is it already loaded?"
