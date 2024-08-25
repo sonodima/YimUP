@@ -72,7 +72,7 @@ try {
     Invoke-WebRequest "$( $repoUrl )/releases/download/nightly/YimMenu.dll" -OutFile $libPath
 } catch {
     Write-Output "[-] failed to write the menu to disk; is it already loaded?"
-    exit
+    return
 }
 
 $libHash = Get-FileHash -Path $libPath -Algorithm SHA256
@@ -103,7 +103,7 @@ $handle = [PInvoke.Kernel32]::OpenProcess(0x43A, $false, $game.Id)
 if ( $handle -eq 0x0 ) {
     $result = [PInvoke.Kernel32]::GetLastError()
     Write-Output "[-] failed to open process. error=$( $result )"
-    exit
+    return
 }
 
 
@@ -115,7 +115,7 @@ if ( $libPathAlloc -eq 0x0 ) {
     Write-Output "[-] failed to allocate string buffer. error=$( $result )"
 
     [PInvoke.Kernel32]::CloseHandle($handle) | Out-Null
-    exit
+    return
 }
 
 $result = [PInvoke.Kernel32]::WriteProcessMemory($handle, $libPathAlloc, $libPathBytes,
@@ -126,7 +126,7 @@ if ( -not $result ) {
 
     [PInvoke.Kernel32]::VirtualFreeEx($handle, $libPathAlloc, 0, 0x8000) | Out-Null
     [PInvoke.Kernel32]::CloseHandle($handle) | Out-Null
-    exit
+    return
 }
 
 
@@ -138,7 +138,7 @@ if ( $hKernel32 -eq 0x0 ) {
 
     [PInvoke.Kernel32]::VirtualFreeEx($handle, $libPathAlloc, 0, 0x8000) | Out-Null
     [PInvoke.Kernel32]::CloseHandle($handle) | Out-Null
-    exit
+    return
 }
 
 $loadLibrary = [PInvoke.Kernel32]::GetProcAddress($hKernel32, "LoadLibraryW")
@@ -148,7 +148,7 @@ if ( $loadLibrary -eq 0x0 ) {
 
     [PInvoke.Kernel32]::VirtualFreeEx($handle, $libPathAlloc, 0, 0x8000) | Out-Null
     [PInvoke.Kernel32]::CloseHandle($handle) | Out-Null
-    exit
+    return
 }
 
 
@@ -161,7 +161,7 @@ if ( $thread -eq 0x0 ) {
 
     [PInvoke.Kernel32]::VirtualFreeEx($handle, $libPathAlloc, 0, 0x8000) | Out-Null
     [PInvoke.Kernel32]::CloseHandle($handle) | Out-Null
-    exit
+    return
 }
 
 [PInvoke.Kernel32]::WaitForSingleObject($thread, [UInt32]::MaxValue) | Out-Null
