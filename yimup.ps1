@@ -77,8 +77,14 @@ try {
     return
 }
 
-$libHash = Get-FileHash -Path $libPath -Algorithm SHA256
-Write-Output "[+] file downloaded successfully. sha256=$( $libHash.Hash.ToLower() )"
+try {
+    # This will throw an exception if Windows Defender is enabled!
+    $libHash = Get-FileHash -Path $libPath -Algorithm SHA256
+    Write-Output "[+] file downloaded successfully. sha256=$( $libHash.Hash.ToLower() )"
+} catch {
+    Write-Output "[-] failed to compute the file hash; the menu may have been falsely-flagged by your anti-virus!"
+    return
+}
 
 
 
