@@ -69,6 +69,8 @@ $libPath = $dataDir + "/" + $libName
 
 try {
     Write-Output "[>] downloading the latest release..."
+    # Microsoft thought that updating the progress bar every byte downloaded would be a good idea.
+    $ProgressPreference = "SilentlyContinue"
     Invoke-WebRequest "$( $repoUrl )/releases/download/nightly/YimMenu.dll" -OutFile $libPath
 } catch {
     Write-Output "[-] failed to write the menu to disk; is it already loaded?"
